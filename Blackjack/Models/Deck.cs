@@ -43,5 +43,10 @@ namespace Blackjack.Models
                 cards.RemoveAt(0);
                 return card;
         }
+
+        public int GetRemainingCards()
+        {
+            return cards.Count;
+        }
     }
 }
