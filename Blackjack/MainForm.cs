@@ -256,7 +256,17 @@ namespace Blackjack
 
             btnHit.Enabled = false;
             btnStand.Enabled = false;
-            btnPlaceBet.Enabled = true;
+            
+            if (game.GetBalance() <= 0)
+            {
+                MessageBox.Show("Game Over! You're out of money.", "Game Over");
+                btnPlaceBet.Enabled = false;
+                txtBetAmount.Enabled = false;
+            }
+            else
+            {
+                btnPlaceBet.Enabled = true;
+            }
         }
 
         private void AdjustLabelFont(Label label, int maxWidth)

@@ -113,7 +113,7 @@ namespace Blackjack.Models
             if (playerTotal > 21)
             {
                 result = "You busted. Dealer wins.";
-                playerBalance -= currentBet;
+                playerBalance = Math.Max(0, playerBalance - currentBet);
             }
             else if (dealerTotal > 21)
             {
@@ -128,7 +128,7 @@ namespace Blackjack.Models
             else if (dealerTotal > playerTotal)
             {
                 result = "Dealer wins.";
-                playerBalance -= currentBet;
+                playerBalance = Math.Max(0, playerBalance - currentBet);
             }
             else
             {
