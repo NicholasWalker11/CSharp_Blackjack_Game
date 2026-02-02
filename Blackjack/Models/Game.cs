@@ -5,6 +5,9 @@ namespace Blackjack.Models
         private Deck deck;
         private Hand playerHand;
         private Hand dealerHand;
+        private int playerBalance;
+        private int currentBet;
+        private int insuranceBet;
 
         public Game()
         {
@@ -12,6 +15,68 @@ namespace Blackjack.Models
             deck.Shuffle();
             playerHand = new Hand();
             dealerHand = new Hand();
+            playerBalance = 1000;
+        }
+
+        public int GetBalance()
+        {
+            return playerBalance;
+        }
+
+        public bool PlaceBet(int amount)
+        {
+            if (amount <= 0 || amount > playerBalance)
+            {
+                return false;
+            }
+
+            currentBet = amount;
+            return true;
+        }
+
+        public int GetCurrentBet()
+        {
+            return currentBet;
+        }
+
+        public bool PlaceInsurance()
+        {
+            int insuranceCost = currentBet / 2;
+            int availableBalance = playerBalance - currentBet;
+
+            if (availableBalance < insuranceCost)
+            {
+                return false;
+            }
+
+            insuranceBet = insuranceCost;
+            return true;
+        }
+
+        public bool DealerHasBlackjack()
+        {
+            return dealerHand.GetTotalValue() == 21;
+        }
+
+        public void ResolveInsurance()
+        {
+            if (insuranceBet > 0)
+            {
+                if (DealerHasBlackjack())
+                {
+                    int payout = insuranceBet * 2;
+                    playerBalance += payout;
+                    Console.WriteLine($"Dealer had blackjack. Your insurance bet wins you {payout} chips!");
+                }
+
+                else 
+                {
+                    playerBalance -= insuranceBet;
+                    Console.WriteLine($"Dealer didn't have blackjack. Your insurance bet fails. You lose {insuranceBet} chips.");
+                }
+
+                insuranceBet = 0;
+            }
         }
 
         public void DealInitialCards()
@@ -21,111 +86,106 @@ namespace Blackjack.Models
 
             dealerHand.AddCard(deck.DealCard());
             dealerHand.AddCard(deck.DealCard());
-
-            Console.WriteLine("Your hand is: ");
-            Console.Write(playerHand.GetHandDisplay());
-            Console.WriteLine($"Total: {playerHand.GetTotalValue()}\n");
-
-            Console.WriteLine("Dealer's Hand: ");
-            Console.WriteLine($"  - [Hidden Card]");
-            Console.WriteLine($"  - {dealerHand.GetFirstCard()}");
-
-            Card dealerUpCard = dealerHand.GetFirstCard();
-            if (dealerUpCard.CardRank == Rank.Ace){
-                Console.WriteLine("\nDealer shows an Ace!");
-            }
         }
 
-        public void PlayerTurn(){
-            while (playerHand.GetTotalValue() < 21){
-                Console.Write("Do you want to (H)it or (S)tand? ");
-                string choice = Console.ReadLine()?.ToUpper() ?? "";
-                
-                if (choice == "H"){
-                    Card newCard = deck.DealCard();
-                    playerHand.AddCard(newCard);
-                    Console.WriteLine($"\nYou drew: {newCard}");
-                    Console.Write($"Your current hand is: \n{playerHand.GetHandDisplay()}");
-                    Console.WriteLine($"Total: {playerHand.GetTotalValue()}");
-                }
-                else if (choice == "S"){
-                    Console.WriteLine("\nYou Stand.");
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid choice! Please enter H or S.");
-                }
-            }
+        public Card PlayerHit()
+        {
+            Card newCard = deck.DealCard();
+            playerHand.AddCard(newCard);
+            return newCard;
         }
 
         public void DealerTurn()
         {
-            Console.WriteLine("\n=== Dealer's Turn ===");
-            Console.WriteLine("Dealer reveals hidden card");
-            Console.Write(dealerHand.GetHandDisplay());
-            Console.WriteLine($"Dealer's total: {dealerHand.GetTotalValue()}");
-
             while (dealerHand.GetTotalValue() < 17)
             {
-                Console.WriteLine("\nDealer hits...");
                 Card newCard = deck.DealCard();
                 dealerHand.AddCard(newCard);
-                Console.WriteLine($"Dealer drew: {newCard}");
-                Console.WriteLine($"Dealer's total is: {dealerHand.GetTotalValue()}");
-                
-                if (dealerHand.GetTotalValue() > 21)
-                {
-                    Console.WriteLine("\nDealer busts!");
-                    break;
-                }
-            }
-
-            if (dealerHand.GetTotalValue() <= 21)
-            {
-                Console.WriteLine("\nDealer stands.");
             }
         }
 
-        public void DetermineWinner()
+        public string DetermineWinner()
         {
-            Console.WriteLine("\n=== Final Results ===");
-
             int playerTotal = playerHand.GetTotalValue();
             int dealerTotal = dealerHand.GetTotalValue();
-
-            Console.WriteLine($"Your total is: {playerTotal}");
-            Console.WriteLine($"Dealer's total is: {dealerTotal}\n");
+            string result;
 
             if (playerTotal > 21)
             {
-                Console.WriteLine("You busted. Dealer wins.");
+                result = "You busted. Dealer wins.";
+                playerBalance -= currentBet;
             }
-
             else if (dealerTotal > 21)
             {
-                Console.WriteLine("Dealer busted. You win!");
+                result = "Dealer busted. You win!";
+                playerBalance += currentBet;
             }
-
             else if (playerTotal > dealerTotal)
             {
-                Console.WriteLine("You win!");
+                result = "You win!";
+                playerBalance += currentBet;
             }
-
             else if (dealerTotal > playerTotal)
             {
-                Console.WriteLine("Dealer wins.");
+                result = "Dealer wins.";
+                playerBalance -= currentBet;
             }
-
             else
             {
-                Console.WriteLine("It's a tie!");
+                result = "It's a tie!";
             }
+
+            return result;
         }
-        
+
         public int GetPlayerTotal()
         {
             return playerHand.GetTotalValue();
+        }
+
+        public Card GetDealerUpCard()
+        {
+            return dealerHand.GetFirstCard();
+        }
+
+        public Hand GetPlayerHand()
+        {
+            return playerHand;
+        }
+
+        public Hand GetDealerHand()
+        {
+            return dealerHand;
+        }
+
+        public int GetDealerTotal()
+        {
+            return dealerHand.GetTotalValue();
+        }
+
+        public bool IsPlayerBusted()
+        {
+            return playerHand.GetTotalValue() > 21;
+        }
+
+        public bool IsDealerBusted()
+        {
+            return dealerHand.GetTotalValue() > 21;
+        }
+
+        public void StartNewRound()
+        {
+            playerHand = new Hand();
+            dealerHand = new Hand();
+            currentBet = 0;
+            insuranceBet = 0;
+            
+            // Reshuffle deck if getting low on cards (fewer than 10 remaining)
+            if (deck.GetRemainingCards() < 10)
+            {
+                deck = new Deck();
+                deck.Shuffle();
+            }
         }
     }
 }

@@ -42,9 +42,14 @@ namespace Blackjack.Models
             string display = "";
             foreach (Card card in cards)
             {
-                display += $"  - {card}\n";
+                display += $"{card}, ";
             }
 
+            if (display.Length > 0)
+            {
+                display = display.Substring(0, display.Length - 2);
+            }
+    
             return display;
         }
 
