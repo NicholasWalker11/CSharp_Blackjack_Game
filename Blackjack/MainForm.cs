@@ -7,6 +7,7 @@ namespace Blackjack
         private Game game;
 
         // UI Controls
+        private System.Media.SoundPlayer? backgroundMusic;
         private Label lblBalance = null!;
         private Label lblBet = null!;
         private Label lblPlayerCards = null!;
@@ -18,6 +19,9 @@ namespace Blackjack
         private Button btnStand = null!;
         private TextBox txtBetAmount = null!;
         private Button btnPlaceBet = null!;
+        private PictureBox picPokerChip = null!;
+        private PictureBox picDeck = null!;
+
         public MainForm()
         {
             game = new Game();
@@ -29,6 +33,13 @@ namespace Blackjack
             this.Size = new Size(1200, 800);
             this.MinimumSize = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
+            
+            // Set background image
+            this.BackgroundImage = Image.FromFile("background.png");
+            this.BackgroundImageLayout = ImageLayout.None;
+
+            backgroundMusic = new System.Media.SoundPlayer("Blackjack_Game_music_1.wav");
+            backgroundMusic.PlayLooping();
         }
 
         private void InitializeComponent()
@@ -116,6 +127,23 @@ namespace Blackjack
             btnPlaceBet.Font = new Font("Terminal", 12, FontStyle.Bold);
             btnPlaceBet.Click += BtnPlaceBet_Click;
             this.Controls.Add(btnPlaceBet);
+
+            picPokerChip = new PictureBox();
+            picPokerChip.Size = new Size(50, 50);
+            picPokerChip.Location = new Point(574, 390);
+            picPokerChip.BackColor = Color.Transparent;
+            picPokerChip.SizeMode = PictureBoxSizeMode.StretchImage;
+            picPokerChip.Visible = false;
+            this.Controls.Add(picPokerChip);
+
+            picDeck = new PictureBox();
+            picDeck.Image = Image.FromFile("deck_of_cards_sprite.png");
+            picDeck.Size = new Size(300, 300);
+            picDeck.Location = new Point(850, 150);
+            picDeck.BackColor = Color.Transparent;
+            picDeck.SizeMode = PictureBoxSizeMode.StretchImage;
+            picDeck.Visible = true;
+            this.Controls.Add(picDeck);
         }
 
         private void BtnPlaceBet_Click(object? sender, EventArgs e)
@@ -130,6 +158,8 @@ namespace Blackjack
             {
                 lblBet.Text = $"Current Bet: ${game.GetCurrentBet()}";
                 lblBalance.Text = $"Balance: ${game.GetBalance()}";
+                picPokerChip.Image = Image.FromFile("poker chip sprites.png");
+                picPokerChip.Visible = true;
                 btnDeal.Enabled = true;
                 btnPlaceBet.Enabled = false;
             }
@@ -253,6 +283,7 @@ namespace Blackjack
             lblDealerTotal.Text = "Total: 0";
             lblBalance.Text = $"Balance: ${game.GetBalance()}";
             lblBet.Text = "Current Bet: $0";
+            picPokerChip.Visible = false;
 
             btnHit.Enabled = false;
             btnStand.Enabled = false;
